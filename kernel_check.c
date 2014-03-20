@@ -6,10 +6,7 @@
 #ifdef DEBUG
 #include "unit_test.h"
 #endif
-<<<<<<< HEAD
 
-=======
->>>>>>> 2b2ab5dc5b7fbc9b63e2447085c32d03c8415e4e
 #include <stddef.h>
 #include <ctype.h> //test ctype
 
@@ -19,13 +16,6 @@ void *malloc(size_t size)
 	return m;
 }
 
-#include <ctype.h>
-
-void *malloc(size_t size)
-{
-	static char m[1024] = {0};
-	return m;
-}
 void *memcpy(void *dest, const void *src, size_t n);
 
 int strcmp(const char *a, const char *b) __attribute__ ((naked));
@@ -664,10 +654,6 @@ void show_task_info(int argc, char* argv[])
 		task_info_status[0]='0'+tasks[task_i].status;
 		task_info_status[1]='\0';			
 
-<<<<<<< HEAD
-=======
-		itoa_1(tasks[task_i].priority, task_info_priority, 10);		
->>>>>>> 2b2ab5dc5b7fbc9b63e2447085c32d03c8415e4e
 		itoa(tasks[task_i].priority,task_info_priority);
 
 		write(fdout, &task_info_pid , 2);
@@ -682,17 +668,13 @@ void show_task_info(int argc, char* argv[])
 
 //this function helps to show int
 
-<<<<<<< HEAD
 void itoa(int n, char *buffer)
-=======
-void itoa_1(int n, char *dst, int base)
->>>>>>> 2b2ab5dc5b7fbc9b63e2447085c32d03c8415e4e
 {
 	if (n == 0)
 		*(buffer++) = '0';
 	else {
 		int f = 10000;
-
+f
 		if (n < 0) {
 			*(buffer++) = '-';
 			n = -n;
@@ -709,27 +691,6 @@ void itoa_1(int n, char *dst, int base)
 	*buffer = '\0';
 }
 
-void itoa(int n, char *buffer)
-{
-	if (n == 0)
-		*(buffer++) = '0';
-	else {
-		int f = 10000;
-		if (n < 0) {
- 			*(buffer++) = '-';
- 			n = -n;
-		}
-		while (f != 0) {
- 			int i = n / f;
- 			if (i != 0) {
- 				*(buffer++) = '0'+(i%10);;
- 			}
- 			f/=10;
- 		}
- 	}
- 	*buffer = '\0';
-  }
-}
 //help
 
 void show_cmd_info(int argc, char* argv[])
@@ -1289,16 +1250,10 @@ int main()
 			i++;
 		current_task = task_pop(&ready_list[i])->pid;
 	}
-<<<<<<< HEAD
 
 #ifdef DEBUG
 	unit_test();
 #endif
 
-=======
-#ifdef DEBUG
-	unit_test();
-#endif
->>>>>>> 2b2ab5dc5b7fbc9b63e2447085c32d03c8415e4e
 	return 0;
 }

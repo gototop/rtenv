@@ -117,3 +117,7 @@ check: unit_test.c unit_test.h
 
 clean:
 	rm -f *.elf *.bin *.list test-*.txt
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2b2ab5dc5b7fbc9b63e2447085c32d03c8415e4e
