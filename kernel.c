@@ -1,10 +1,20 @@
 #include "stm32f10x.h"
 #include "RTOSConfig.h"
 
+#include "kernel.h"
 #include "syscall.h"
-
+#ifdef DEBUG
+#include "unit_test.h"
+#endif
 #include <stddef.h>
 
+#include <ctype.h>
+
+void *malloc(size_t size)
+{
+	static char m[1024] = {0};
+	return m;
+}
 void *memcpy(void *dest, const void *src, size_t n);
 
 int strcmp(const char *a, const char *b) __attribute__ ((naked));
@@ -666,7 +676,8 @@ void show_task_info(int argc, char* argv[])
 		task_info_status[0]='0'+tasks[task_i].status;
 		task_info_status[1]='\0';			
 
-		itoa(tasks[task_i].priority, task_info_priority, 10);
+		itoa_1(tasks[task_i].priority, task_info_priority, 10);		
+		itoa(tasks[task_i].priority,task_info_priority);
 
 		write(fdout, &task_info_pid , 2);
 		write_blank(3);
@@ -680,7 +691,7 @@ void show_task_info(int argc, char* argv[])
 
 //this function helps to show int
 
-void itoa(int n, char *dst, int base)
+void itoa_1(int n, char *dst, int base)
 {
 	char buf[33] = {0};
 	char *p = &buf[32];
@@ -700,6 +711,27 @@ void itoa(int n, char *dst, int base)
 	strcpy(dst, p);
 }
 
+void itoa(int n, char *buffer)
+{
+	if (n == 0)
+		*(buffer++) = '0';
+	else {
+		int f = 10000;
+		if (n < 0) {
+ 			*(buffer++) = '-';
+ 			n = -n;
+		}
+		while (f != 0) {
+ 			int i = n / f;
+ 			if (i != 0) {
+ 				*(buffer++) = '0'+(i%10);;
+ 			}
+ 			f/=10;
+ 		}
+ 	}
+ 	*buffer = '\0';
+  }
+}
 //help
 
 void show_cmd_info(int argc, char* argv[])
@@ -1259,6 +1291,8 @@ int main()
 			i++;
 		current_task = task_pop(&ready_list[i])->pid;
 	}
-
+#ifdef DEBUG
+	unit_test();
+#endif
 	return 0;
 }
