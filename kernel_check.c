@@ -1,9 +1,20 @@
 #include "stm32f10x.h"
 #include "RTOSConfig.h"
 
+#include "kernel.h"
 #include "syscall.h"
+#ifdef DEBUG
+#include "unit_test.h"
+#endif
 
 #include <stddef.h>
+#include <ctype.h> //test ctype
+
+void *malloc(size_t size)
+{
+	static char m[1024] = {0};
+	return m;
+}
 
 void *memcpy(void *dest, const void *src, size_t n);
 
@@ -60,14 +71,6 @@ void puts(char *s)
 	}
 }
 
-#define MAX_CMDNAME 19
-#define MAX_ARGC 19
-#define MAX_CMDHELP 1023
-#define HISTORY_COUNT 20
-#define CMDBUF_SIZE 100
-#define MAX_ENVCOUNT 30
-#define MAX_ENVNAME 15
-#define MAX_ENVVALUE 127
 #define STACK_SIZE 512 /* Size of task stacks in words */
 #define TASK_LIMIT 8  /* Max number of tasks we can handle */
 #define PIPE_BUF   64 /* Size of largest atomic pipe message */
@@ -107,16 +110,6 @@ void show_task_info(int argc, char *argv[]);
 void show_man_page(int argc, char *argv[]);
 void show_history(int argc, char *argv[]);
 
-/* Enumeration for command types. */
-enum {
-	CMD_ECHO = 0,
-	CMD_EXPORT,
-	CMD_HELP,
-	CMD_HISTORY,
-	CMD_MAN,
-	CMD_PS,
-	CMD_COUNT
-} CMD_TYPE;
 /* Structure for command handler. */
 typedef struct {
 	char cmd[MAX_CMDNAME + 1];
@@ -132,11 +125,6 @@ const hcmd_entry cmd_data[CMD_COUNT] = {
 	[CMD_PS] = {.cmd = "ps", .func = show_task_info, .description = "List all the processes."}
 };
 
-/* Structure for environment variables. */
-typedef struct {
-	char name[MAX_ENVNAME + 1];
-	char value[MAX_ENVVALUE + 1];
-} evar_entry;
 evar_entry env_var[MAX_ENVCOUNT];
 int env_count = 0;
 
@@ -666,7 +654,7 @@ void show_task_info(int argc, char* argv[])
 		task_info_status[0]='0'+tasks[task_i].status;
 		task_info_status[1]='\0';			
 
-		itoa(tasks[task_i].priority, task_info_priority, 10);
+		itoa(tasks[task_i].priority,task_info_priority);
 
 		write(fdout, &task_info_pid , 2);
 		write_blank(3);
@@ -680,24 +668,27 @@ void show_task_info(int argc, char* argv[])
 
 //this function helps to show int
 
-void itoa(int n, char *dst, int base)
+void itoa(int n, char *buffer)
 {
-	char buf[33] = {0};
-	char *p = &buf[32];
-
 	if (n == 0)
-		*--p = '0';
+		*(buffer++) = '0';
 	else {
-		char *q;
-		unsigned int num = (base == 10 && n < 0) ? -n : n;
+		int f = 10000;
+f
+		if (n < 0) {
+			*(buffer++) = '-';
+			n = -n;
+		}
 
-		for (; num; num/=base)
-			*--p = "0123456789ABCDEF" [num % base];
-		if (base == 10 && n < 0)
-			*--p = '-';
+		while (f != 0) {
+			int i = n / f;
+			if (i != 0) {
+				*(buffer++) = '0'+(i%10);;
+			}
+			f/=10;
+		}
 	}
-
-	strcpy(dst, p);
+	*buffer = '\0';
 }
 
 //help
@@ -1259,6 +1250,10 @@ int main()
 			i++;
 		current_task = task_pop(&ready_list[i])->pid;
 	}
+
+#ifdef DEBUG
+	unit_test();
+#endif
 
 	return 0;
 }
